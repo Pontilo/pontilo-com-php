@@ -1,0 +1,30 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+# Ignore all files in the dist/out directories
+dist/
+out/
+pontilo-dashboard/out/
+
+# Configuração local da API PHP (credenciais) -- nunca versionar
+backend-php/config.php
+
+# Pasta de build gerada para deploy (regenerar a cada publicação, ver DEPLOY_AUDIT.md)
+/deploy/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

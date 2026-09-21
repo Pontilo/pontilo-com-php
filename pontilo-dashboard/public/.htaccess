@@ -1,0 +1,41 @@
+# App Pontos — public_html/ (frontend estático gerado por "npm run build")
+# Este arquivo é copiado automaticamente para dentro de out/ durante o
+# export estático do Next.js (tudo que está em public/ vai para a raiz do
+# build). Depois é só enviar o conteúdo de out/ para public_html/ na
+# Locaweb, junto com a pasta api/ (ver backend-php/).
+
+RewriteEngine On
+
+# Força HTTPS.
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Nunca reescrever pedidos para /api/ -- são atendidos pelo PHP em api/.htaccess.
+RewriteRule ^api/ - [L]
+
+# Rotas dinâmicas renderizadas 100% no cliente (ver MIGRATION_NOTES.md):
+# o Next.js gera um único HTML "placeholder" para cada uma no build
+# estático (como arquivo plano "placeholder.html", sem trailing slash);
+# aqui qualquer ID real é servido por esse mesmo arquivo, e o componente
+# cliente lê o ID verdadeiro da URL do navegador.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^dashboard/classrooms/[^/]+/?$ /dashboard/classrooms/placeholder.html [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ranking/professor/ranking/[^/]+/?$ /ranking/professor/ranking/placeholder.html [L]
+
+# Página de erro 404 personalizada (gerada pelo Next.js no export estático).
+ErrorDocument 404 /404.html
+
+# Cache agressivo para os assets versionados do Next (_next/static/**).
+<IfModule mod_headers.c>
+    <FilesMatch "\.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|webp|ico)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+Options -Indexes
