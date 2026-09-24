@@ -801,7 +801,7 @@ export default function Home() {
               <div className="mt-12 border-t border-white/20 pt-8">
                 <p className="mb-4 text-lg text-white/90">Aluno? Acesse o ranking da sua turma</p>
                 <Button asChild size="lg" className="h-12 bg-white px-8 text-primary hover:bg-white/90">
-                  <Link href="https://pontilo.com.br/ranking">
+                  <Link href="/ranking">
                     Acessar Ranking da Minha Turma
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>

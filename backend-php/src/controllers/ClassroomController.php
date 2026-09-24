@@ -169,33 +169,31 @@ final class ClassroomController
         $classrooms = $stmt->fetchAll();
 
         $studentsStmt = $pdo->prepare('SELECT * FROM students WHERE classroom_id = :classroom_id');
-        $countStmt = $pdo->prepare('SELECT COUNT(*) AS c FROM points WHERE student_id = :student_id');
 
-        // Replica fielmente o Node original: a query busca apenas o ULTIMO
-        // ponto dentro do filtro de periodo (take: 1) e usa esse unico valor
-        // como "totalPoints" -- nao eh a soma de todos os pontos do periodo.
-        // Ver MIGRATION_NOTES.md.
-        $lastPointSql = 'SELECT value, type, reason, created_at FROM points WHERE student_id = :student_id';
-        $lastPointParams = [];
+        // NOTA: o backend Node original computava "totalPoints" a partir de
+        // apenas o ULTIMO ponto (take: 1) em vez da soma real dos pontos do
+        // periodo -- um bug real (nao uma regra de negocio), corrigido aqui
+        // a pedido explicito do usuario (consumido pelo app mobile para
+        // ranking de alunos). Ver MIGRATION_NOTES.md.
+        $pointsSql = 'SELECT value, type, reason, created_at FROM points WHERE student_id = :student_id';
+        $pointsParams = [];
         if ($range) {
-            $lastPointSql .= ' AND created_at BETWEEN :start AND :end';
-            $lastPointParams = ['start' => $range['start'], 'end' => $range['end']];
+            $pointsSql .= ' AND created_at BETWEEN :start AND :end';
+            $pointsParams = ['start' => $range['start'], 'end' => $range['end']];
         }
-        $lastPointSql .= ' ORDER BY created_at DESC LIMIT 1';
-        $lastPointStmt = $pdo->prepare($lastPointSql);
+        $pointsSql .= ' ORDER BY created_at DESC';
+        $pointsStmt = $pdo->prepare($pointsSql);
 
-        $result = array_map(function ($classroom) use ($studentsStmt, $countStmt, $lastPointStmt, $lastPointParams) {
+        $result = array_map(function ($classroom) use ($studentsStmt, $pointsStmt, $pointsParams) {
             $studentsStmt->execute(['classroom_id' => $classroom['id']]);
-            $students = array_map(function ($student) use ($countStmt, $lastPointStmt, $lastPointParams) {
-                $countStmt->execute(['student_id' => $student['id']]);
-                $pointsCount = (int) $countStmt->fetch()['c'];
-
-                $lastPointStmt->execute(array_merge(['student_id' => $student['id']], $lastPointParams));
-                $lastPoint = $lastPointStmt->fetch();
+            $students = array_map(function ($student) use ($pointsStmt, $pointsParams) {
+                $pointsStmt->execute(array_merge(['student_id' => $student['id']], $pointsParams));
+                $points = $pointsStmt->fetchAll();
+                $lastPoint = $points[0] ?? null;
 
                 $mapped = self::mapStudent($student);
-                $mapped['totalPoints'] = $lastPoint ? (int) $lastPoint['value'] : 0;
-                $mapped['pointsCount'] = $pointsCount;
+                $mapped['totalPoints'] = array_sum(array_column($points, 'value'));
+                $mapped['pointsCount'] = count($points);
                 $mapped['lastPoint'] = $lastPoint ? [
                     'value' => (int) $lastPoint['value'],
                     'type' => $lastPoint['type'],

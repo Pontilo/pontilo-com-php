@@ -90,13 +90,20 @@ aplicado quando `user.type === 'teacher'` e a turma não é dele. Um token de
 essa rota para qualquer `classroomId` sem bloqueio. Preservado fielmente;
 mesma recomendação de revisão de segurança do item 7.
 
-## 9. `getClassroomsByTeacher`: "totalPoints" reflete só o último ponto
+## 9. `getClassroomsByTeacher`: "totalPoints" reflete só o último ponto — CORRIGIDO
 
-Em `GET /api/teachers/:teacherId/classrooms`, a consulta original busca
-apenas o **último** ponto de cada aluno dentro do filtro de período
-(`take: 1`) e usa esse único valor como `totalPoints` — não é a soma real
-dos pontos do período (isso só existe nos endpoints de relatório/dashboard).
-Preservado fielmente no PHP (`ClassroomController::getByTeacher`).
+Em `GET /api/teachers/:teacherId/classrooms`, a consulta original (Node)
+buscava apenas o **último** ponto de cada aluno dentro do filtro de período
+(`take: 1`) e usava esse único valor como `totalPoints` — não era a soma
+real dos pontos do período. Isso foi inicialmente preservado fielmente no
+PHP, mas o app mobile (`Pontilo-App`) usa exatamente esse campo para
+ordenar o ranking de alunos em "Pesquisar Pontos" — um bug real de
+implementação (não uma regra de negócio), que produzia um ranking incorreto
+também no app. A pedido explícito do usuário, `ClassroomController::getByTeacher`
+foi corrigido para somar todos os pontos do período em `totalPoints`,
+mantendo `lastPoint` como campo separado. `pointsCount` passou a refletir
+a contagem dentro do período filtrado (antes era sempre "desde sempre",
+inconsistente com os outros campos do mesmo endpoint).
 
 ## 10. IDs (`cuid()` → string gerada pela aplicação)
 

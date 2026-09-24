@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { apiUrl } from "@/lib/api-config"
 import { BarChart3, Users, User, Award, Heart, Star, Trophy, FileDown } from "lucide-react"
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib"
+import { PDFDocument, rgb } from "pdf-lib"
 
 export default function ReportsPage() {
   const { token } = useAuthStore()
@@ -195,7 +195,11 @@ export default function ReportsPage() {
 
   const generatePdf = async (title: string, lines: string[]) => {
     const pdfDoc = await PDFDocument.create()
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+    // "Helvetica" em vez do enum StandardFonts: a declaração de tipos da
+    // pdf-lib 1.17.1 tem um re-export quebrado (aponta para "pdf-lib/src/..."
+    // em vez de um caminho relativo) que falha sob moduleResolution: "bundler".
+    // O valor é o mesmo em runtime (StandardFonts.Helvetica === "Helvetica").
+    const font = await pdfDoc.embedFont("Helvetica")
     const page = pdfDoc.addPage([595, 842])
     const fontSize = 12
     let y = 800

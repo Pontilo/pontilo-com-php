@@ -1,6 +1,6 @@
 # Deploy — Locaweb via SSH + Git
 
-Repo: `https://github.com/alexandretimachado/pontilo-dashboard.git`
+Repo: `https://github.com/Pontilo/pontilo-com-php.git`
 Estratégia: branch `deploy` contém exatamente o conteúdo de `public_html/`
 (gerado a partir de `deploy/` local). `public_html` no servidor é um clone
 dessa branch.
@@ -20,7 +20,7 @@ cd deploy
 git init -q
 git add -A
 git commit -q -m "deploy $(date +%Y-%m-%d_%H-%M)"
-git remote add origin https://github.com/alexandretimachado/pontilo-dashboard.git 2>/dev/null || true
+git remote add origin https://github.com/Pontilo/pontilo-com-php.git 2>/dev/null || true
 git push -f origin HEAD:deploy
 cd ..
 ```
@@ -33,7 +33,7 @@ cd public_html
 rm -rf * .[!.]*          # limpa o conteúdo padrão da hospedagem
 
 git init
-git remote add origin https://github.com/alexandretimachado/pontilo-dashboard.git
+git remote add origin https://github.com/Pontilo/pontilo-com-php.git
 git fetch origin deploy
 git checkout -f deploy
 
