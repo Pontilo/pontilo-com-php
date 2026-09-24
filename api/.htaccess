@@ -1,0 +1,24 @@
+# App Pontos — API PHP
+# Este arquivo deve ficar dentro de public_html/api/ (junto com index.php).
+# Encaminha toda requisicao para index.php, que faz o roteamento interno.
+
+RewriteEngine On
+
+# Força HTTPS.
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Permite o header Authorization chegar ao PHP em hospedagens onde ele
+# normalmente é descartado pelo Apache/FastCGI.
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Nao reescreve se o arquivo/diretorio pedido existir de fato.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+
+# Nunca expor config.php pelo navegador.
+<Files "config.php">
+    Require all denied
+</Files>
