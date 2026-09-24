@@ -137,3 +137,17 @@ caminho nunca existiu no Express** (que só registra
 `/students/avatar/config` etc., sem `:studentId`, pegando o aluno pelo
 token) — ou seja, essas rotas do Next sempre retornavam 404 em produção.
 Não foram portadas (nenhum comportamento observável foi perdido).
+
+## 14. `/dashboard/classrooms/[id]`: `params` como prop não funciona no export estático — CORRIGIDO
+
+Achado em produção (não em build): a página usava `params: Promise<{id}>`
+recebido como prop (padrão Next.js normal), mas em export estático essa
+prop fica **travada no valor gerado em build time** (`"placeholder"`) para
+qualquer visita real ao HTML reaproveitado via `.htaccess` — diferente de
+`useParams()` (hook), que lê o segmento da URL do navegador de verdade após
+a hidratação. Sintoma real: `GET /api/classrooms/placeholder` (404) e,
+consequentemente, criar aluno enviando `classroomId: "placeholder"` (403,
+turma inexistente). A outra rota dinâmica
+(`/ranking/professor/ranking/[classroomId]`) já usava `useParams()` desde
+o início e nunca teve esse problema. Corrigido trocando `classroom-page-client.tsx`
+para `useParams()` também — mesma abordagem nas duas rotas dinâmicas agora.

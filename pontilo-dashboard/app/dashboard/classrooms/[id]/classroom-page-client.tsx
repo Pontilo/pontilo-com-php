@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { useAuthStore } from "@/lib/stores/auth-store"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -108,10 +108,15 @@ interface Point {
   type: string
 }
 
-export default function ClassroomPageClient({ params }: { params: Promise<{ id: string }> }) {
+export default function ClassroomPageClient() {
   const { token } = useAuthStore()
   const router = useRouter()
   const { toast } = useToast()
+  // useParams() lê o segmento [id] direto da URL do navegador -- ao
+  // contrário de receber "params" como prop (que, no export estático,
+  // fica travado no valor gerado em build time, "placeholder", para
+  // qualquer visita real). Ver PRODUCTION_ROLLOUT.md / MIGRATION_NOTES.md.
+  const routeParams = useParams<{ id: string }>()
   const [classroom, setClassroom] = useState<Classroom | null>(null)
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
@@ -157,26 +162,19 @@ export default function ClassroomPageClient({ params }: { params: Promise<{ id: 
       return
     }
 
-    const initializePage = async () => {
-      try {
-        const { id } = await params
-        if (!id) {
-          throw new Error("ID da turma não encontrado")
-        }
-        setClassroomId(id)
-      } catch (error) {
-        console.error("Error initializing page:", error)
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar os dados da turma",
-          variant: "destructive",
-        })
-        router.push("/dashboard/classrooms")
-      }
+    const id = routeParams?.id
+    if (!id) {
+      console.error("Error initializing page: ID da turma não encontrado")
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os dados da turma",
+        variant: "destructive",
+      })
+      router.push("/dashboard/classrooms")
+      return
     }
-
-    initializePage()
-  }, [isClient, token])
+    setClassroomId(id)
+  }, [isClient, token, routeParams])
 
   // Novo useEffect para buscar os dados quando o classroomId mudar
   useEffect(() => {

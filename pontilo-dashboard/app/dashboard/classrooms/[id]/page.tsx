@@ -4,13 +4,13 @@ import ClassroomPageClient from "./classroom-page-client"
 // saber, em tempo de build, quais valores de [id] existem. Como o id real
 // só é conhecido em runtime (dados vêm da API), geramos um único HTML
 // "placeholder" e o .htaccess do frontend reescreve qualquer
-// /dashboard/classrooms/<id> para esse arquivo. No navegador, o componente
-// cliente lê o id real da própria URL (via params/useParams), então a
-// página funciona normalmente para qualquer turma.
+// /dashboard/classrooms/<id> para esse arquivo. O componente cliente lê o
+// id real da URL via useParams() (NÃO via prop "params" -- essa fica
+// travada no valor de build time em páginas exportadas estaticamente).
 export function generateStaticParams() {
   return [{ id: "placeholder" }]
 }
 
-export default function ClassroomPage({ params }: { params: Promise<{ id: string }> }) {
-  return <ClassroomPageClient params={params} />
+export default function ClassroomPage() {
+  return <ClassroomPageClient />
 }
