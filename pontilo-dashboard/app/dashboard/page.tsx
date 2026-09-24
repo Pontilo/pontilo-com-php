@@ -161,7 +161,7 @@ export default function DashboardPage() {
       {/* Welcome Header */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">Bem-vindo ao Pontilo</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Bem-vindo ao App Pontos</h1>
           {subscription && (
             <Badge variant="outline" className="flex items-center gap-2">
               <span className="font-semibold">{subscription.plan}</span>
@@ -459,7 +459,7 @@ export default function DashboardPage() {
               <Star className="h-5 w-5 text-primary" />
               Primeiros Passos
             </CardTitle>
-            <CardDescription>Complete estas tarefas para começar a usar o Pontilo</CardDescription>
+            <CardDescription>Complete estas tarefas para começar a usar o App Pontos</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "ProvaMais - Sistema de Gestão de Pontos",
+  title: "App Pontos - Sistema de Gestão de Pontos",
   description: "Gerencie pontos e recompensas para seus alunos de forma simples e eficiente",
   icons: {
     icon: [

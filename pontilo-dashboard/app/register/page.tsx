@@ -76,7 +76,7 @@ export default function RegisterPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" />
-            Pontilo
+            App Pontos
           </CardTitle>
           <CardDescription className="text-center">
             Crie sua conta para começar a gerenciar pontos

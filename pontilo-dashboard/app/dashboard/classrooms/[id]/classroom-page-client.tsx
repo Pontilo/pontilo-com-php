@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { useLastPathSegment } from "@/lib/use-static-route-param"
 import { useAuthStore } from "@/lib/stores/auth-store"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -112,11 +113,11 @@ export default function ClassroomPageClient() {
   const { token } = useAuthStore()
   const router = useRouter()
   const { toast } = useToast()
-  // useParams() lê o segmento [id] direto da URL do navegador -- ao
-  // contrário de receber "params" como prop (que, no export estático,
-  // fica travado no valor gerado em build time, "placeholder", para
-  // qualquer visita real). Ver PRODUCTION_ROLLOUT.md / MIGRATION_NOTES.md.
-  const routeParams = useParams<{ id: string }>()
+  // Nem params (prop) nem useParams() refletem o ID real aqui: em export
+  // estático o roteador cliente do Next só conhece os valores enumerados em
+  // generateStaticParams ("placeholder"). Lemos o segmento direto da URL do
+  // navegador. Ver MIGRATION_NOTES.md.
+  const routeId = useLastPathSegment()
   const [classroom, setClassroom] = useState<Classroom | null>(null)
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
@@ -162,8 +163,12 @@ export default function ClassroomPageClient() {
       return
     }
 
-    const id = routeParams?.id
-    if (!id) {
+    if (routeId === null) {
+      // ainda não rodou no cliente (primeiro render/SSR) -- espera o
+      // próximo efeito, quando useLastPathSegment já tiver lido a URL real.
+      return
+    }
+    if (!routeId || routeId === "placeholder") {
       console.error("Error initializing page: ID da turma não encontrado")
       toast({
         title: "Erro",
@@ -173,8 +178,8 @@ export default function ClassroomPageClient() {
       router.push("/dashboard/classrooms")
       return
     }
-    setClassroomId(id)
-  }, [isClient, token, routeParams])
+    setClassroomId(routeId)
+  }, [isClient, token, routeId])
 
   // Novo useEffect para buscar os dados quando o classroomId mudar
   useEffect(() => {

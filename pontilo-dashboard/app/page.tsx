@@ -9,8 +9,8 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-md shadow-sm">
         <div className="container mx-auto relative flex h-16 items-center justify-between px-4">
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <img src="/icon.png" alt="Pontilo" className="h-10 w-10 md:h-15 md:w-15" />
-            <span className="text-2xl font-bold text-primary">Pontilo</span>
+            <img src="/icon.png" alt="App Pontos" className="h-10 w-10 md:h-15 md:w-15" />
+            <span className="text-2xl font-bold text-primary">App Pontos</span>
           </div>
           <div className="flex items-center gap-4 ml-auto">
             <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-primary">
@@ -42,7 +42,7 @@ export default function Home() {
             <h1 className="mb-6 text-5xl font-black tracking-tight text-gray-900 sm:text-6xl md:text-7xl leading-tight">
               Seus alunos estão <span className="text-red-500">desmotivados</span>?<br/>
               <span className="text-primary bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Pontilo muda isso em 24h
+                App Pontos muda isso em 24h
               </span>
             </h1>
             
@@ -100,7 +100,7 @@ export default function Home() {
       <section className="py-16 bg-white border-b">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <p className="text-gray-600 mb-8">Professores de todo o Brasil já confiam no Pontilo:</p>
+            <p className="text-gray-600 mb-8">Professores de todo o Brasil já confiam no App Pontos:</p>
             <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
               {/* Placeholder for school logos */}
               <div className="bg-gray-100 px-6 py-3 rounded-lg font-semibold text-gray-600">Escola Municipal São João</div>
@@ -125,7 +125,7 @@ export default function Home() {
             <div className="grid gap-8 md:grid-cols-2 mb-16">
               {/* Problems */}
               <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-red-600 mb-6">😔 Antes do Pontilo:</h3>
+                <h3 className="text-2xl font-bold text-red-600 mb-6">😔 Antes do App Pontos:</h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3 p-4 bg-red-50 rounded-lg border-l-4 border-red-400">
                     <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
@@ -160,7 +160,7 @@ export default function Home() {
 
               {/* Solutions */}
               <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-green-600 mb-6">🎉 Depois do Pontilo:</h3>
+                <h3 className="text-2xl font-bold text-green-600 mb-6">🎉 Depois do App Pontos:</h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
                     <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
@@ -214,7 +214,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-4xl font-bold tracking-tight text-gray-900">
-              Como o Pontilo <span className="text-primary">transforma</span> sua sala de aula
+              Como o App Pontos <span className="text-primary">transforma</span> sua sala de aula
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-gray-600">
               Em apenas 4 passos simples, você terá alunos mais engajados e uma gestão muito mais eficiente
@@ -421,7 +421,7 @@ export default function Home() {
               </div>
               <div>
                 <div className="text-3xl font-bold text-primary mb-2">98%</div>
-                <div className="text-sm text-gray-600">Recomendam o Pontilo</div>
+                <div className="text-sm text-gray-600">Recomendam o App Pontos</div>
               </div>
             </div>
             <div className="mt-8">
@@ -444,7 +444,7 @@ export default function Home() {
               Mais de <span className="text-primary">15.000 professores</span> já transformaram suas salas de aula
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-gray-600">
-              Veja o que educadores como você estão dizendo sobre o Pontilo
+              Veja o que educadores como você estão dizendo sobre o App Pontos
             </p>
           </div>
 
@@ -693,7 +693,7 @@ export default function Home() {
               <h3 className="text-2xl font-bold">Garantia de 30 dias ou seu dinheiro de volta</h3>
             </div>
             <p className="text-gray-600 mb-6">
-              Teste o Pontilo por 30 dias. Se não ficar 100% satisfeito com os resultados, 
+              Teste o App Pontos por 30 dias. Se não ficar 100% satisfeito com os resultados, 
               devolvemos todo seu dinheiro. Sem perguntas, sem burocracia.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -818,7 +818,7 @@ export default function Home() {
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex items-center gap-2">
               <Award className="h-6 w-6 text-primary" />
-              <span className="text-lg font-bold">Pontilo</span>
+              <span className="text-lg font-bold">App Pontos</span>
             </div>
             <div className="flex flex-wrap items-center gap-6">
               <Link href="#" className="text-sm text-gray-600 hover:text-primary">
@@ -834,7 +834,7 @@ export default function Home() {
                 Contato
               </Link>
             </div>
-            <div className="text-sm text-gray-500">© 2024 Pontilo. Todos os direitos reservados.</div>
+            <div className="text-sm text-gray-500">© 2024 App Pontos. Todos os direitos reservados.</div>
           </div>
         </div>
       </footer>

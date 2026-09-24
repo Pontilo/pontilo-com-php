@@ -141,7 +141,7 @@ $router->post('/ranking/login', fn() => RankingController::studentLogin());
 $router->post('/ranking/refreshlogin', fn() => RankingController::refreshStudentLogin());
 $router->get('/ranking/validate', fn() => RankingController::validateStudentToken());
 $router->put('/ranking/update-password', fn() => StudentController::updateOwnPassword());
-$router->post('/ranking/getStudentFromClassroom', fn() => RankingController::getStudentFromClassroomMock());
+$router->post('/ranking/getStudentFromClassroom', fn() => RankingController::getStudentFromClassroom());
 $router->post('/ranking/teacher/login', fn() => RankingController::teacherLogin());
 $router->get('/ranking/classroom/:classroomId', fn($p) => RankingController::classroomRanking($p));
 

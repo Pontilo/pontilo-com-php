@@ -10,19 +10,23 @@
     --card-foreground: 0 0% 18%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 18%;
-    --primary: 214 70% 39%;
+    /* Azul + dourado de marca (App Pontos), extraído diretamente da logo
+       oficial (badge azul com estrelas douradas) — mesma cor usada no app
+       mobile (lib/theme.dart, brandPrimary = #0F5FBF), unificando a
+       identidade visual entre dashboard web e app. */
+    --primary: 213 85% 40%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 151 55% 41%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 47 92% 53%;
+    --secondary-foreground: 0 0% 18%;
     --muted: 210 16% 92%;
     --muted-foreground: 0 0% 40%;
-    --accent: 151 55% 41%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 47 92% 53%;
+    --accent-foreground: 0 0% 18%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: 210 16% 85%;
     --input: 210 16% 85%;
-    --ring: 214 70% 39%;
+    --ring: 213 85% 40%;
     --radius: 0.75rem;
   }
 
@@ -33,19 +37,19 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 214 70% 55%;
+    --primary: 213 65% 54%;
     --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 151 55% 35%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 47 85% 48%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 151 55% 35%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 47 85% 48%;
+    --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 214 70% 55%;
+    --ring: 213 65% 54%;
   }
 }
 

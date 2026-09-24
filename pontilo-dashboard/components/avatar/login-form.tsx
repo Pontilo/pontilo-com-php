@@ -260,6 +260,12 @@ export default function LoginForm({ onLogin, onTeacherLogin }: LoginFormProps) {
                   />
                   <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 </div>
+                {userType === 'student' && (
+                  <p className="text-xs text-gray-500 flex items-center gap-1.5 pt-1">
+                    <Info className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
+                    Primeiro acesso? A senha inicial é <span className="font-semibold text-gray-700">123</span>
+                  </p>
+                )}
               </div>
 
               {error && (

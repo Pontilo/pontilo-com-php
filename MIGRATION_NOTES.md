@@ -27,23 +27,33 @@ a API PHP responde nos mesmos caminhos (`/api/...`) e no mesmo domínio, os
 pontos de chamada no frontend (`fetch("/api/...")`, `apiUrl(...)`) **não
 precisaram ser alterados**.
 
-## 3. `/api/ranking/getStudentFromClassroom`: mock "escondia" a rota real
+## 3. `/api/ranking/getStudentFromClassroom`: mock quebrava a tela (CORRIGIDO)
 
 - O backend Express tem uma rota real `POST /ranking/getStudentFromClassroom`
   (autenticada como aluno) que busca um aluno pelo nome dentro de uma turma.
 - O proxy Next.js no **mesmo caminho** (`app/api/ranking/getStudentFromClassroom/route.ts`)
   nunca chamava esse endpoint: ele gerava pontos **100% aleatórios/mockados**
   a partir de `studentCode`, `quarter` e `discipline`, usados por
-  `app/ranking/pontos/page.tsx`.
-- Como o Next.js ficava na frente do Express em produção, a rota real nunca
-  era alcançada pelo navegador — o mock é o comportamento que os usuários
-  realmente veem hoje.
-- **Decisão**: preservado o comportamento mock em
-  `RankingController::getStudentFromClassroomMock()`, no mesmo caminho
-  `/api/ranking/getStudentFromClassroom`. A rota "real" (busca por nome) não
-  foi exposta na API PHP, pois nunca foi de fato alcançável pelo frontend em
-  produção — se for necessária no futuro, pode ser adicionada em um caminho
-  próprio.
+  `app/ranking/pontos/page.tsx`. Esse mock foi inicialmente preservado em
+  `RankingController::getStudentFromClassroomMock()` para manter o
+  comportamento observável em produção.
+- **Problema real encontrado após o deploy**: o mock nunca devolvia
+  `student.name`, `student.classroom` nem `classroom.teacher`, campos que
+  `app/ranking/pontos/page.tsx` lê diretamente (sem optional chaining) —
+  todo aluno que tentava ver seus pontos na tela "Visualizar Pontos do
+  Aluno" recebia `TypeError: Cannot read properties of undefined (reading
+  'name')` e a tela quebrava. Além disso, mostrar pontos **aleatórios**
+  sob o nome real do aluno nunca foi um comportamento desejável — era uma
+  falha do app original, não uma feature.
+- **Correção**: `RankingController::getStudentFromClassroom()` agora
+  autentica o aluno via JWT (`Auth::requireStudent()`, igual às outras
+  rotas de aluno) e devolve dados reais: aluno, turma e professor do banco,
+  e os pontos reais (`points`) do aluno filtrados por uma janela de meses
+  do ano corrente (não existe uma coluna "trimestre" no schema, então
+  `quarter` 1–4 mapeia para Jan–Mar/Abr–Jun/Jul–Set/Out–Dez). O parâmetro
+  `discipline` continua sendo aceito pelo formulário (não há coluna de
+  disciplina em `points`, então ele não filtra nada — é apenas validado
+  como presente por compatibilidade com a tela).
 
 ## 4. `GET /api/ranking` (Next.js) — rota morta, não portada
 

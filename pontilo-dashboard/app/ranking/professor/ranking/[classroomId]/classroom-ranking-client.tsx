@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { useLastPathSegment } from "@/lib/use-static-route-param"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -74,12 +75,26 @@ export default function TeacherClassroomRankingClient() {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const router = useRouter()
-  const params = useParams()
-  const classroomId = params.classroomId as string
+  // Nem params (prop) nem useParams() refletem o ID real aqui: em export
+  // estático o roteador cliente do Next só conhece os valores enumerados em
+  // generateStaticParams ("placeholder"). Lemos o segmento direto da URL do
+  // navegador. Ver MIGRATION_NOTES.md.
+  const classroomId = useLastPathSegment()
 
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    if (classroomId === null) {
+      // ainda não rodou no cliente (primeiro render) -- espera o próximo
+      // efeito, quando useLastPathSegment já tiver lido a URL real.
+      return
+    }
+    if (!classroomId || classroomId === "placeholder") {
+      setError("Turma não encontrada")
+      setIsLoading(false)
+      return
+    }
+
     setMounted(true)
     const savedTeacher = sessionStorage.getItem("teacherData")
     if (savedTeacher) {
@@ -88,7 +103,7 @@ export default function TeacherClassroomRankingClient() {
       router.push('/ranking')
       return
     }
-    
+
     fetchClassroomRanking()
   }, [classroomId])
 
