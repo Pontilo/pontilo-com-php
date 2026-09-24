@@ -173,97 +173,102 @@ final class RankingController
     }
 
     /**
-     * Equivalente ao endpoint mock de app/api/ranking/getStudentFromClassroom/route.ts
-     * do frontend Next.js. NOTA IMPORTANTE: o backend Express original tem uma rota real
-     * "POST /ranking/getStudentFromClassroom" (busca aluno por nome+turma), mas em
-     * producao ela nunca era alcancada -- o proxy do Next.js interceptava o mesmo
-     * caminho "/api/ranking/getStudentFromClassroom" e respondia com dados 100%
-     * aleatorios/mockados (usados por app/ranking/pontos/page.tsx), sem nunca chamar
-     * o backend real. Esse mock e o comportamento realmente visto pelos usuarios hoje,
-     * entao e o que preservamos aqui. Ver MIGRATION_NOTES.md.
+     * Usado por app/ranking/pontos/page.tsx ("Visualizar Pontos do Aluno").
+     * NOTA: essa rota tinha um mock no Next.js original que nunca chamava o
+     * backend real e devolvia pontos 100% aleatorios (ver historico em
+     * MIGRATION_NOTES.md) -- alem de gerar dados falsos, o mock nem devolvia
+     * student.name/student.classroom/classroom.teacher que a tela usa,
+     * quebrando a pagina com TypeError. Substituido por dados reais do aluno
+     * autenticado. O filtro de "trimestre" mapeia para uma janela de meses do
+     * ano corrente (nao ha um campo trimestre real no schema); "discipline"
+     * e aceito por compatibilidade com o formulario mas nao filtra nada, pois
+     * points nao tem uma coluna de disciplina.
      */
-    public static function getStudentFromClassroomMock(): void
+    public static function getStudentFromClassroom(): void
     {
-        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        if (!preg_match('/^Bearer\s+.+$/i', trim($authHeader))) {
-            Response::error('Token de autorização necessário', 401);
-        }
+        $tokenPayload = Auth::requireStudent();
 
         $body = Helpers::body();
-        $studentCode = $body['studentCode'] ?? null;
         $quarter = $body['quarter'] ?? null;
         $discipline = $body['discipline'] ?? null;
 
-        if (!$studentCode || !$quarter || !$discipline) {
-            Response::error('Parâmetros obrigatórios: studentCode, quarter, discipline', 400);
+        if (!$quarter || !$discipline) {
+            Response::error('Parâmetros obrigatórios: quarter, discipline', 400);
         }
         if (!in_array((int) $quarter, [1, 2, 3, 4], true)) {
             Response::error('Trimestre deve ser 1, 2, 3 ou 4', 400);
         }
 
-        $points = self::generateFilteredPoints((int) $quarter, (string) $discipline);
-        $totalPoints = array_sum(array_column($points, 'value'));
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare('SELECT * FROM students WHERE id = :id');
+        $stmt->execute(['id' => $tokenPayload['id']]);
+        $student = $stmt->fetch();
+        if (!$student) {
+            Response::error('Aluno não encontrado', 404);
+        }
+
+        $classroomStmt = $pdo->prepare('SELECT * FROM classrooms WHERE id = :id');
+        $classroomStmt->execute(['id' => $student['classroom_id']]);
+        $classroom = $classroomStmt->fetch();
+
+        $teacherStmt = $pdo->prepare('SELECT id, name, email, created_at FROM teachers WHERE id = :id');
+        $teacherStmt->execute(['id' => $classroom['teacher_id']]);
+        $teacher = $teacherStmt->fetch();
+
+        $quarterMonths = [1 => [1, 2, 3], 2 => [4, 5, 6], 3 => [7, 8, 9], 4 => [10, 11, 12]];
+        $months = $quarterMonths[(int) $quarter];
+        $year = (int) date('Y');
+        $start = sprintf('%04d-%02d-01 00:00:00', $year, $months[0]);
+        $endMonth = $months[count($months) - 1];
+        $endDay = (int) (new DateTime(sprintf('%04d-%02d-01', $year, $endMonth)))->format('t');
+        $end = sprintf('%04d-%02d-%02d 23:59:59', $year, $endMonth, $endDay);
+
+        $pointsStmt = $pdo->prepare('SELECT id, value, type, reason, created_at FROM points WHERE student_id = :student_id AND created_at BETWEEN :start AND :end ORDER BY created_at DESC');
+        $pointsStmt->execute(['student_id' => $student['id'], 'start' => $start, 'end' => $end]);
+        $points = array_map(fn($p) => [
+            'id' => $p['id'],
+            'value' => (int) $p['value'],
+            'type' => $p['type'],
+            'reason' => $p['reason'],
+            'createdAt' => $p['created_at'],
+        ], $pointsStmt->fetchAll());
+
         $pointsByType = ['heart' => 0, 'star' => 0, 'trophy' => 0];
         foreach ($points as $p) {
             $pointsByType[$p['type']] = ($pointsByType[$p['type']] ?? 0) + $p['value'];
         }
+        $totalPoints = array_sum(array_column($points, 'value'));
 
         Response::json([
+            'classroom' => [
+                'id' => $classroom['id'],
+                'name' => $classroom['name'],
+                'teacher' => [
+                    'id' => $teacher['id'],
+                    'name' => $teacher['name'],
+                    'email' => $teacher['email'],
+                    'createdAt' => $teacher['created_at'],
+                ],
+            ],
             'student' => [
-                'code' => $studentCode,
+                'id' => $student['id'],
+                'name' => $student['name'],
+                'code' => $student['code'],
+                'classroomId' => $student['classroom_id'],
+                'avatarPoints' => (int) $student['avatar_points'],
+                'createdAt' => $student['created_at'],
+                'classroom' => [
+                    'id' => $classroom['id'],
+                    'name' => $classroom['name'],
+                    'teacherId' => $classroom['teacher_id'],
+                    'createdAt' => $classroom['created_at'],
+                ],
                 'points' => $points,
                 'totalPoints' => $totalPoints,
                 'pointsCount' => count($points),
                 'pointsByType' => $pointsByType,
             ],
         ]);
-    }
-
-    private static function generateFilteredPoints(int $quarter, string $discipline): array
-    {
-        $disciplines = [
-            'MATEMATICA' => 'Matemática', 'PORTUGUES' => 'Português', 'HISTORIA' => 'História',
-            'GEOGRAFIA' => 'Geografia', 'CIENCIAS' => 'Ciências', 'INGLES' => 'Inglês',
-            'EDUCACAO_FISICA' => 'Educação Física', 'ARTES' => 'Artes', 'FILOSOFIA' => 'Filosofia',
-            'SOCIOLOGIA' => 'Sociologia',
-        ];
-        $disciplineName = $disciplines[$discipline] ?? $discipline;
-
-        $reasons = [
-            "Excelente participação em {$disciplineName}", "Atividade de {$disciplineName} bem executada",
-            "Prova de {$disciplineName} - nota máxima", "Trabalho em grupo de {$disciplineName}",
-            "Apresentação de {$disciplineName}", "Exercício de {$disciplineName} correto",
-            "Lição de casa de {$disciplineName}", "Projeto de {$disciplineName} criativo",
-            "Pesquisa de {$disciplineName} completa", "Seminário de {$disciplineName} excelente",
-        ];
-
-        $types = ['heart', 'star', 'trophy'];
-        $pointsCount = random_int(3, 10);
-        $points = [];
-
-        $quarterMonths = [1 => [0, 1, 2], 2 => [3, 4, 5], 3 => [6, 7, 8], 4 => [9, 10, 11]];
-        $months = $quarterMonths[$quarter] ?? [0, 1, 2];
-        $year = 2025;
-
-        for ($i = 0; $i < $pointsCount; $i++) {
-            $month = $months[array_rand($months)];
-            $day = random_int(1, 28);
-            $hour = random_int(8, 19);
-            $minute = random_int(0, 59);
-            $date = (new DateTime())->setDate($year, $month + 1, $day)->setTime($hour, $minute);
-
-            $points[] = [
-                'id' => 'cmd' . (int) (microtime(true) * 1000) . $i . substr(md5((string) mt_rand()), 0, 9),
-                'value' => random_int(1, 5),
-                'type' => $types[array_rand($types)],
-                'reason' => $reasons[array_rand($reasons)],
-                'createdAt' => $date->format('c'),
-            ];
-        }
-
-        usort($points, fn($a, $b) => strcmp($b['createdAt'], $a['createdAt']));
-
-        return $points;
     }
 
     private static function findStudentByCode(?string $code): ?array
